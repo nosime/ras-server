@@ -7,8 +7,7 @@ services:
     networks:
       - cloudflare_network
     env_file:
-      - ../../.env      # Global env (priority thấp)
-      - .env            # Service env (override global)
+      - ../../.env      # Global env - chứa CLOUDFLARE_TOKEN
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
     profiles:
       - all
