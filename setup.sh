@@ -1,14 +1,15 @@
 #!/bin/bash
-# setup.sh - Script khởi tạo dự án ras-server
-# Chạy trên server Linux: bash setup.sh
+# setup.sh - Khởi tạo / cập nhật ras-server
+# Lần đầu: bash setup.sh
+# Cập nhật:  bash setup.sh   (chạy lại cũng được)
 
 set -e
 
-echo "========================================"
-echo "  ras-server Setup Script"
-echo "========================================"
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "========================================"
+echo "  ras-server Setup"
+echo "========================================"
 
 # ── 0. ARM64 / Raspberry Pi: bật QEMU emulation cho amd64 containers ─────────
 ARCH=$(uname -m)
@@ -24,25 +25,25 @@ fi
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
     echo "[1/4] Tạo .env từ .env.example..."
     cp "$SCRIPT_DIR/.env.example" "$SCRIPT_DIR/.env"
-    
+
     # Tự động tạo MONITOR_TOKEN ngẫu nhiên
     MONITOR_TOKEN=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
     sed -i "s|your_strong_random_token_here_min_32_chars|$MONITOR_TOKEN|g" "$SCRIPT_DIR/.env"
-    
+
     echo "  ✅ .env đã được tạo"
     echo "  ⚠️  Cần điền CLOUDFLARE_TOKEN vào .env trước khi chạy!"
 else
     echo "[1/4] .env đã tồn tại, bỏ qua..."
 fi
 
-# ── 2. Clone grok-register-panel ─────────────────────────────────────────────
+# ── 2. Clone / pull grok-register-panel source ───────────────────────────────
 PANEL_SRC="$SCRIPT_DIR/services/grok-register-panel/src"
 if [ ! -d "$PANEL_SRC/.git" ]; then
     echo "[2/4] Clone grok-register-panel..."
     git clone https://github.com/lij768423-svg/grok-register-panel.git "$PANEL_SRC"
     echo "  ✅ Đã clone xong"
 else
-    echo "[2/4] grok-register-panel/src đã tồn tại, pull updates..."
+    echo "[2/4] Pull grok-register-panel source mới nhất..."
     git -C "$PANEL_SRC" pull
     echo "  ✅ Đã cập nhật"
 fi
@@ -74,13 +75,17 @@ echo "========================================"
 echo "  Setup hoàn tất!"
 echo "========================================"
 echo ""
-echo "Bước tiếp theo:"
-echo "  1. Điền CLOUDFLARE_TOKEN vào .env"
-echo "  2. Điền email provider vào services/grok-register-panel/config.json"
-echo "  3. Build & chạy:"
-echo "     docker compose build grok-register-panel"
-echo "     docker compose --profile all up -d"
+echo "Các lệnh tiếp theo:"
+echo ""
+echo "  # Build image grok-register-panel (lần đầu hoặc khi muốn cập nhật):"
+echo "  docker compose build grok-register-panel"
+echo ""
+echo "  # Khởi động tất cả services:"
+echo "  docker compose --profile all up -d --no-build --pull never"
+echo ""
+echo "  # Xem logs:"
+echo "  docker compose logs -f"
 echo ""
 echo "Cloudflare Tunnel routes:"
-echo "  grok2api:          http://grok2api:8000"
+echo "  grok2api:            http://grok2api:8000"
 echo "  grok-register-panel: http://grok-register-panel:8787"
