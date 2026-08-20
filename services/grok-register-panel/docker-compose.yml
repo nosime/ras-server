@@ -6,6 +6,8 @@ services:
       context: ./src
       dockerfile: ../Dockerfile
     image: grok-register-panel:local
+    # Không pull từ registry - chỉ dùng image đã build local
+    pull_policy: never
     container_name: grok-register-panel
     restart: unless-stopped
     # ⚠️  QUAN TRỌNG: Camoufox chỉ có binary amd64, KHÔNG có ARM64.
