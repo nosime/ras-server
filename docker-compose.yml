@@ -1,0 +1,13 @@
+
+# Include all service compose files
+include:
+  - ./services/cloudflared/docker-compose.yml
+  - ./services/grok2api/docker-compose.yml
+  - ./services/grok-register-panel/docker-compose.yml
+
+# Global networks definition
+networks:
+  cloudflare_network:
+    name: cloudflare_network
+    driver: bridge
+    external: false

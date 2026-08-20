@@ -1,0 +1,21 @@
+# Ensure consistent line endings across platforms
+# Shell scripts and configs must use LF for Linux/Raspberry Pi
+
+* text=auto
+
+# Force LF for shell scripts (Linux server)
+*.sh text eol=lf
+
+# Force LF for Docker/YAML/config files
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.env text eol=lf
+*.env.example text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+
+# Gitkeep
+.gitkeep text eol=lf

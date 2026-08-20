@@ -1,0 +1,27 @@
+# Shared network configuration
+#
+# Kiến trúc internal network:
+#
+#   [Internet] ──► cloudflared ──► cloudflare_network (bridge)
+#                                        │
+#                              ┌─────────┼──────────────┐
+#                              ▼         ▼              ▼
+#                         cloudflared  grok2api   grok-register-panel
+#                                      :8000           :8787
+#
+# - cloudflared: expose ra Cloudflare CDN, không publish port ra host
+# - grok2api: KHÔNG publish port ra host, chỉ accessible qua tên container
+#             → cloudflared route: http://grok2api:8000
+# - grok-register-panel: KHÔNG publish port ra host, chỉ accessible qua tên container
+#             → cloudflared route: http://grok-register-panel:8787
+#
+# Các container giao tiếp qua DNS tên container trong cùng bridge network.
+
+networks:
+  cloudflare_network:
+    name: cloudflare_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

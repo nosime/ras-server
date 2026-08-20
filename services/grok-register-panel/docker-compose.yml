@@ -1,0 +1,47 @@
+services:
+  grok-register-panel:
+    # Build từ source - repo được clone vào: services/grok-register-panel/src/
+    # Xem setup.sh để clone tự động
+    build:
+      context: ./src
+      dockerfile: ../Dockerfile
+    image: grok-register-panel:local
+    container_name: grok-register-panel
+    restart: unless-stopped
+    # ⚠️  QUAN TRỌNG: Camoufox chỉ có binary amd64, KHÔNG có ARM64.
+    # Trên Raspberry Pi (aarch64), Docker sẽ dùng QEMU emulation để chạy.
+    # Cần bật binfmt_misc trên host: docker run --privileged --rm tonistiigi/binfmt --install all
+    platform: linux/amd64
+    # ports: không cần expose ra host - cloudflared truy cập qua internal network
+    # Truy cập nội bộ: http://grok-register-panel:8787
+    expose:
+      - "${MONITOR_PORT:-8787}"
+    volumes:
+      # Config file - copy từ src/config.example.json và chỉnh sửa
+      - ./config.json:/app/config.json:ro
+      # Persistent data: accounts, logs, auth dirs
+      - ../../data/grok-register-panel/accounts:/app/accounts
+      - ../../data/grok-register-panel/log:/app/log
+      - ../../data/grok-register-panel/cpa_auth:/app/cpa_auth
+      - ../../data/grok-register-panel/grok2api_auth:/app/grok2api_auth
+      # procfs required by panel to manage task processes
+      - /proc:/proc:ro
+    environment:
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+      MONITOR_TOKEN: ${MONITOR_TOKEN}
+      MONITOR_HOST: ${MONITOR_HOST:-0.0.0.0}
+      MONITOR_PORT: ${MONITOR_PORT:-8787}
+      PANEL_INCLUDE_TAIL: ${PANEL_INCLUDE_TAIL:-0}
+      CPA_AUTH_DIR: ${CPA_AUTH_DIR:-/app/cpa_auth}
+      GROK2API_AUTH_DIR: ${GROK2API_AUTH_DIR:-/app/grok2api_auth}
+      # Optional: Override proxy pool state location
+      # PROXY_POOL_STATE_FILE: /app/log/proxy_pool.json
+      # PROXY_NETWORK_COOLDOWN_SECONDS: "90"
+      # PROXY_RISK_COOLDOWN_SECONDS: "1800"
+      # Optional: Override Xvfb behavior (auto | 1 | 0)
+      GROK_USE_XVFB: "1"
+    networks:
+      - cloudflare_network
+    profiles:
+      - all
+      - grok-register-panel

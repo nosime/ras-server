@@ -1,0 +1,38 @@
+# Environment files
+.env
+*.env.local
+*.env.production
+
+# Data directories - ignore content but allow structure
+data/*/
+data/*/*/
+!data/.gitkeep
+!data/*/.gitkeep
+!data/*/*/.gitkeep
+!data/README.md
+
+# External repos cloned at setup time (not tracked)
+services/*/src/
+
+# Config files with secrets
+services/grok-register-panel/config.json
+services/grok-register-panel/proxies*.txt
+services/grok-register-panel/stickies*.txt
+services/grok-register-panel/log/
+
+# Backup files
+backups/
+*.backup
+*.tar.gz
+
+# Log files
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/

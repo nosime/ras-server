@@ -1,0 +1,39 @@
+services:
+  grok2api:
+    image: ghcr.io/jiujiu532/grok2api:latest
+    container_name: grok2api
+    restart: unless-stopped
+    # ports: không cần expose ra host - cloudflared truy cập qua internal network
+    # Truy cập nội bộ: http://grok2api:8000
+    expose:
+      - "${GROK2API_SERVER_PORT:-8000}"
+    volumes:
+      - ../../data/grok2api/data:/app/data
+      - ../../data/grok2api/logs:/app/logs
+    environment:
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+      LOG_LEVEL: ${GROK2API_LOG_LEVEL:-INFO}
+      SERVER_HOST: ${GROK2API_SERVER_HOST:-0.0.0.0}
+      SERVER_PORT: ${GROK2API_SERVER_PORT:-8000}
+      SERVER_WORKERS: ${GROK2API_SERVER_WORKERS:-1}
+      ACCOUNT_STORAGE: ${GROK2API_ACCOUNT_STORAGE:-local}
+      ACCOUNT_LOCAL_PATH: ${GROK2API_ACCOUNT_LOCAL_PATH:-data/accounts.db}
+      # Optional: uncomment to use Redis / MySQL / PostgreSQL
+      # ACCOUNT_REDIS_URL: ${GROK2API_ACCOUNT_REDIS_URL:-}
+      # ACCOUNT_MYSQL_URL: ${GROK2API_ACCOUNT_MYSQL_URL:-}
+      # ACCOUNT_POSTGRESQL_URL: ${GROK2API_ACCOUNT_POSTGRESQL_URL:-}
+      # Optional: enable Cloudflare bypass via FlareSolverr
+      # FLARESOLVERR_URL: http://flaresolverr:8191
+      # CF_REFRESH_INTERVAL: "600"
+      # CF_TIMEOUT: "60"
+    networks:
+      - cloudflare_network
+    profiles:
+      - all
+      - grok2api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:${GROK2API_SERVER_PORT:-8000}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
